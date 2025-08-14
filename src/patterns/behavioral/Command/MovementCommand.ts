@@ -225,3 +225,4 @@ export class NoMovementCommand extends MovementCommand {
   }
 }
 
+

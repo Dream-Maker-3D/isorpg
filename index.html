@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Isometric RPG Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #1a1a1a;
+      color: #ffffff;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+    
+    #game-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #game-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #4CAF50;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    #game-subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      color: #BDBDBD;
+    }
+    
+    #loading {
+      font-size: 1.1rem;
+      color: #FFC107;
+      text-align: center;
+      margin-top: 2rem;
+    }
+    
+    #error {
+      color: #F44336;
+      text-align: center;
+      margin-top: 1rem;
+      display: none;
+    }
+    
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    #game-ui {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    
+    #game-canvas {
+      width: 100%;
+      height: 100%;
+      background: #2d2d2d;
+    }
+    
+    #ui-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      pointer-events: none;
+    }
+    
+    .ui-panel {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #4CAF50;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 5px;
+      pointer-events: auto;
+    }
+    
+    #player-info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      min-width: 200px;
+    }
+    
+    #inventory-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      min-width: 250px;
+    }
+    
+    #controls-help {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 0.9rem;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-ok { background: #4CAF50; }
+    .status-warning { background: #FFC107; }
+    .status-error { background: #F44336; }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <h1 id="game-title">🎮 Isometric RPG</h1>
+      <p id="game-subtitle">A modern, architecturally-sound RPG game</p>
+      
+      <div class="spinner"></div>
+      <div id="loading">Initializing game systems...</div>
+      <div id="error"></div>
+    </div>
+    
+    <!-- Game UI -->
+    <div id="game-ui">
+      <canvas id="game-canvas"></canvas>
+      
+      <div id="ui-overlay">
+        <!-- Player Info Panel -->
+        <div id="player-info" class="ui-panel">
+          <h3>👤 Player Info</h3>
+          <div id="player-stats">
+            <div><span class="status-indicator status-ok"></span>Name: <span id="player-name">-</span></div>
+            <div><span class="status-indicator status-ok"></span>Class: <span id="player-class">-</span></div>
+            <div><span class="status-indicator status-ok"></span>Position: <span id="player-position">-</span></div>
+            <div><span class="status-indicator status-ok"></span>Health: <span id="player-health">-</span></div>
+          </div>
+        </div>
+        
+        <!-- Inventory Panel -->
+        <div id="inventory-panel" class="ui-panel">
+          <h3>🎒 Inventory</h3>
+          <div id="inventory-items">
+            <div>Capacity: <span id="inventory-capacity">-</span></div>
+            <div>Items: <span id="inventory-count">-</span></div>
+            <div id="inventory-list"></div>
+          </div>
+        </div>
+        
+        <!-- Controls Help -->
+        <div id="controls-help" class="ui-panel">
+          <h4>🎮 Controls</h4>
+          <div>WASD - Move</div>
+          <div>Space - Action</div>
+          <div>I - Inventory</div>
+          <div>Esc - Menu</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Script -->
+  <script type="module" src="./src/main.ts"></script>
+  
+  <script>
+    // Global error handler
+    window.addEventListener('error', (event) => {
+      console.error('Global error:', event.error);
+      document.getElementById('error').textContent = `Error: ${event.error.message}`;
+      document.getElementById('error').style.display = 'block';
+    });
+    
+    // Handle game initialization
+    window.addEventListener('load', () => {
+      // This will be handled by the main.ts script
+      console.log('🎮 Game page loaded, waiting for initialization...');
+    });
+  </script>
+</body>
+</html>
+

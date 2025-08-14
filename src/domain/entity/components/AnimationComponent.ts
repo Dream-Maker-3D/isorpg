@@ -3,6 +3,8 @@
  * @description Handles entity animation state and frame management
  */
 
+import { Component } from '@gameKernel/Kernel';
+
 export type Direction = 'north' | 'south' | 'east' | 'west';
 export type AnimationType = 'idle' | 'walk' | 'attack' | 'cast';
 
@@ -29,13 +31,14 @@ export interface AnimationConfig {
  * @description Manages entity animation state and frame progression
  */
 export class AnimationComponent extends Component {
-  public type: string = 'AnimationComponent';
+  public type: string = 'Animation';
   public entityId: string = '';
   private _currentState: AnimationState;
   private _lastFrameTime: number = 0;
   private _configurations: Map<string, AnimationConfig> = new Map();
 
   constructor() {
+    super('AnimationComponent');
     this._currentState = {
       type: 'idle',
       direction: 'south',
