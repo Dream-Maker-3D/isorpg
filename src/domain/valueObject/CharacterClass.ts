@@ -91,6 +91,19 @@ export class CharacterClass implements CharacterClassProperties {
 
   /**
    * @pattern Value Object
+   * @description Get stats object for compatibility with Player entity
+   */
+  public get stats() {
+    return {
+      strength: this.baseAttack,
+      agility: this.baseSpeed,
+      intelligence: this.baseMana,
+      vitality: this.baseHealth
+    };
+  }
+
+  /**
+   * @pattern Value Object
    * @description Get available abilities
    */
   public getAbilities(): string[] {

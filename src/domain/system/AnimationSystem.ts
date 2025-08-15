@@ -40,6 +40,7 @@ export class AnimationSystem extends System {
   private animationSpeed: number = 8; // frames per second
   private lastUpdateTime: number = 0;
   private activeAnimations: Map<string, AnimationEvent> = new Map();
+  private entities: Entity[] = [];
 
   constructor() {
     super();
@@ -48,22 +49,49 @@ export class AnimationSystem extends System {
   }
 
   /**
+   * @pattern System
+   * @description Add entity to the system
+   */
+  public addEntity(entity: Entity): void {
+    this.entities.push(entity);
+  }
+
+  /**
+   * @pattern System
+   * @description Remove entity from the system
+   */
+  public removeEntity(entityId: string): void {
+    const index = this.entities.findIndex(e => e.id === entityId);
+    if (index > -1) {
+      this.entities.splice(index, 1);
+    }
+  }
+
+  /**
+   * @pattern System
+   * @description Get entities with specific component
+   */
+  private getEntitiesWithComponent(componentType: string): Entity[] {
+    return this.entities.filter(entity => entity.hasComponent(componentType));
+  }
+
+  /**
    * @pattern Observer
    * @description Set up event listeners for movement and animation events
    */
   private setupEventListeners(): void {
     // Listen for player movement events
-    this.eventBus.subscribe('player:moved', (event: MovementEvent) => {
+    this.eventBus.on('player:moved', (event: MovementEvent) => {
       this.handleMovementEvent(event);
     });
 
     // Listen for movement failure events
-    this.eventBus.subscribe('player:movement_failed', (event: any) => {
+    this.eventBus.on('player:movement_failed', (event: any) => {
       this.handleMovementFailure(event);
     });
 
     // Listen for animation state changes
-    this.eventBus.subscribe('animation:state_changed', (event: AnimationEvent) => {
+    this.eventBus.on('animation:state_changed', (event: AnimationEvent) => {
       this.handleAnimationStateChange(event);
     });
   }
@@ -82,6 +110,15 @@ export class AnimationSystem extends System {
 
     // Start walk animation in the movement direction
     this.startWalkAnimation(animationComponent, event.direction);
+    
+    // Add to active animations
+    this.activeAnimations.set(entity.id, {
+      entityId: entity.id,
+      animationType: 'walk',
+      direction: event.direction,
+      frameIndex: 0,
+      isComplete: false
+    });
     
     // Emit animation start event
     this.eventBus.emit('animation:walk_started', {
@@ -182,6 +219,9 @@ export class AnimationSystem extends System {
     if (currentType === 'walk') {
       // Transition from walk to idle
       this.startIdleAnimation(animationComponent, animationComponent.currentState.direction);
+      
+      // Remove from active animations
+      this.activeAnimations.delete(entity.id);
       
       this.eventBus.emit('animation:walk_completed', {
         entityId: entity.id,

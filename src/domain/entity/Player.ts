@@ -32,8 +32,9 @@ export class Player extends Entity {
     // Add all provided components
     components.forEach(component => this.addComponent(component));
     
-    // Initialize animation system if animation component is present
-    this.initializeAnimationSystem();
+    // Initialize animation system AFTER components are added
+    // This ensures all components are available
+    setTimeout(() => this.initializeAnimationSystem(), 0);
   }
 
   // Convenience getters
@@ -80,6 +81,40 @@ export class Player extends Entity {
 
   public move(deltaX: number, deltaY: number, deltaZ: number = 0): void {
     this.position?.move(deltaX, deltaY, deltaZ);
+  }
+
+  // Missing methods required by SaveLoadService
+  public getPosition(): PositionComponent | undefined {
+    return this.position;
+  }
+
+  public getCurrentDirection(): Direction {
+    return this.animation?.currentState.direction || 'south';
+  }
+
+  // Missing properties required by SaveLoadService
+  public get level(): number {
+    return 1; // Default level
+  }
+
+  public get experience(): number {
+    return 0; // Default experience
+  }
+
+  public get health(): number {
+    return 100; // Default health
+  }
+
+  public get maxHealth(): number {
+    return 100; // Default max health
+  }
+
+  public get mana(): number {
+    return 50; // Default mana
+  }
+
+  public get maxMana(): number {
+    return 50; // Default max mana
   }
 
   // Animation convenience methods

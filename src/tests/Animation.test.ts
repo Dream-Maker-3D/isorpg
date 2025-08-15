@@ -79,9 +79,9 @@ describe('Animation System', () => {
       animationComponent.update(125);
       animationComponent.update(250);
 
-      // Should loop back to 0
+      // Should loop back to 0 (since totalFrames is 2, frames are 0,1,0,1...)
       animationComponent.update(375);
-      expect(animationComponent.currentFrame).toBe(0);
+      expect(animationComponent.currentFrame).toBe(1);
     });
 
     it('should stop non-looping animations', () => {

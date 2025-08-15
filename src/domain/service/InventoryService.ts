@@ -28,7 +28,7 @@ export class InventoryService {
    * @description Set up event listeners for inventory events
    */
   private setupEventListeners(): void {
-    this.eventBus.subscribe('inventory:event', (event: InventoryEvent) => {
+    this.eventBus.on('inventory:event', (event: InventoryEvent) => {
       this.handleInventoryEvent(event);
     });
   }

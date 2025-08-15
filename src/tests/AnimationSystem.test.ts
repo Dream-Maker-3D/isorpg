@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Player } from '@domain/entity/Player';
 import { Map } from '@domain/entity/Map';
-import { CharacterClass } from '@domain/valueObject/CharacterClass';
+import { CharacterClass, CharacterClassFactory } from '@domain/valueObject/CharacterClass';
 import { PositionComponent } from '@domain/entity/components/PositionComponent';
 import { SpriteComponent } from '@domain/entity/components/SpriteComponent';
 import { AnimationComponent } from '@domain/entity/components/AnimationComponent';
@@ -22,13 +22,13 @@ describe('Animation System', () => {
   let animationService: AnimationService;
   let eventBus: EventBus;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Create a simple 10x10 map
     map = new Map('TestMap', 10, 10, 'standard');
     map.generateRandomMap();
 
     // Create player with components
-    const characterClass = CharacterClass.WARRIOR;
+    const characterClass = CharacterClassFactory.fromType('WARRIOR');
     const positionComponent = new PositionComponent();
     const spriteComponent = new SpriteComponent();
     const animationComponent = new AnimationComponent();
@@ -42,6 +42,9 @@ describe('Animation System', () => {
       animationComponent
     );
 
+    // Wait for animation system to be initialized (setTimeout in Player constructor)
+    await new Promise(resolve => setTimeout(resolve, 10));
+
     // Set player to a walkable position
     const walkablePositions = map.getWalkablePositions();
     if (walkablePositions.length > 0) {
@@ -50,7 +53,9 @@ describe('Animation System', () => {
     }
 
     animationSystem = new AnimationSystem();
+    animationSystem.addEntity(player); // Add player to the animation system
     animationService = new AnimationService();
+    animationService.addEntity(player); // Add player to the animation service
     eventBus = EventBus.getInstance();
   });
 
@@ -112,9 +117,21 @@ describe('Animation System', () => {
       expect(animationSystem.getAnimationSpeed()).toBe(1);
     });
 
-    it('should get active animations', () => {
+    it('should get active animations', async () => {
+      // First trigger a movement event to populate active animations
+      const movementEvent: MovementEvent = {
+        player: player,
+        position: { x: 1, y: 1, z: 0 },
+        previousPosition: { x: 0, y: 0, z: 0 },
+        direction: 'east'
+      };
+      
+      // Manually call the handleMovementEvent method to populate active animations
+      (animationSystem as any).handleMovementEvent(movementEvent);
+      
       const activeAnimations = animationSystem.getActiveAnimations();
       expect(activeAnimations).toBeInstanceOf(Map);
+      expect(activeAnimations.size).toBeGreaterThan(0);
     });
 
     it('should pause all animations', () => {
@@ -249,9 +266,16 @@ describe('Animation System', () => {
       expect(stats.enabled).toBeDefined();
     });
 
-    it('should get active animations', () => {
+    it('should get active animations', async () => {
+      // First start an animation to populate active animations
+      animationService.startWalkAnimation(player, 'north');
+      
+      // Wait a bit for the animation to be processed
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
       const activeAnimations = animationService.getActiveAnimations();
       expect(activeAnimations).toBeInstanceOf(Map);
+      expect(activeAnimations.size).toBeGreaterThan(0);
     });
 
     it('should pause all animations', () => {
@@ -310,7 +334,7 @@ describe('Animation System', () => {
   describe('Animation Events', () => {
     it('should emit walk started event', () => {
       const callback = vi.fn();
-      eventBus.subscribe('animation:walk_started', callback);
+      eventBus.on('animation:walk_started', callback);
       
       animationService.startWalkAnimation(player, 'east');
       
@@ -325,7 +349,7 @@ describe('Animation System', () => {
 
     it('should emit frame updated events', () => {
       const callback = vi.fn();
-      eventBus.subscribe('animation:frame_updated', callback);
+      eventBus.on('animation:frame_updated', callback);
       
       animationService.startWalkAnimation(player, 'south');
       animationService.update(Date.now());
@@ -335,7 +359,7 @@ describe('Animation System', () => {
 
     it('should handle animation completion', () => {
       const callback = vi.fn();
-      eventBus.subscribe('animation:walk_completed', callback);
+      eventBus.on('animation:walk_completed', callback);
       
       // Start walk animation and let it complete
       animationService.startWalkAnimation(player, 'west');

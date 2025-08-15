@@ -63,7 +63,7 @@ export class AnimationComponent extends Component {
   }
 
   public get animationType(): AnimationType {
-    return this._currentState.animationType;
+    return this._currentState.type;
   }
 
   public get isPlaying(): boolean {
@@ -112,26 +112,27 @@ export class AnimationComponent extends Component {
     const frameInterval = 1000 / this._currentState.frameRate;
     
     if (currentTime - this._lastFrameTime >= frameInterval) {
-      this._currentState = {
-        ...this._currentState,
-        currentFrame: this._currentState.currentFrame + 1
-      };
+      let newFrame = this._currentState.currentFrame + 1;
 
       // Handle frame wrapping
-      if (this._currentState.currentFrame >= this._currentState.totalFrames) {
+      if (newFrame >= this._currentState.totalFrames) {
         if (this._currentState.isLooping) {
-          this._currentState = {
-            ...this._currentState,
-            currentFrame: 0
-          };
+          newFrame = 0;
         } else {
           this._currentState = {
             ...this._currentState,
             isPlaying: false,
             currentFrame: this._currentState.totalFrames - 1
           };
+          this._lastFrameTime = currentTime;
+          return;
         }
       }
+
+      this._currentState = {
+        ...this._currentState,
+        currentFrame: newFrame
+      };
 
       this._lastFrameTime = currentTime;
     }

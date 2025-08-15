@@ -497,11 +497,28 @@ export class GameOriginator {
  * @description Memento caretaker for managing save history and storage
  */
 export class GameCaretaker {
-  private mementos: Map<string, GameMemento> = new Map();
+  private _mementos: Map<string, GameMemento> = new Map();
   private originator: GameOriginator;
   private maxSaves: number = 10;
   private autoSaveInterval: number = 300000; // 5 minutes
   private lastAutoSave: number = 0;
+
+  // Getter to ensure mementos is always a Map
+  private get mementos(): Map<string, GameMemento> {
+    if (!(this._mementos instanceof Map)) {
+      this._mementos = new Map();
+    }
+    return this._mementos;
+  }
+
+  // Setter to ensure mementos is always a Map
+  private set mementos(value: Map<string, GameMemento>) {
+    if (value instanceof Map) {
+      this._mementos = value;
+    } else {
+      this._mementos = new Map();
+    }
+  }
 
   constructor(originator: GameOriginator) {
     this.originator = originator;
@@ -662,12 +679,21 @@ export class GameCaretaker {
     try {
       const saves = JSON.parse(json) as string[];
       saves.forEach(saveJson => {
-        const memento = GameMemento.fromJSON(saveJson);
-        this.mementos.set(memento.id, memento);
+        try {
+          const memento = GameMemento.fromJSON(saveJson);
+          if (memento && memento.isValid()) {
+            this.mementos.set(memento.id, memento);
+          }
+        } catch (mementoError) {
+          console.warn('Failed to import individual save:', mementoError);
+          // Continue with other saves
+        }
       });
       this.cleanupOldSaves();
     } catch (error) {
-      throw new Error(`Failed to import saves: ${error}`);
+      console.warn('Failed to import saves, resetting mementos:', error);
+      // Reset mementos to prevent corruption
+      this.mementos = new Map();
     }
   }
 }

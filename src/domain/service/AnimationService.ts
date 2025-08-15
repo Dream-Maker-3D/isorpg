@@ -25,24 +25,32 @@ export class AnimationService {
   }
 
   /**
+   * @pattern Facade
+   * @description Add entity to the animation system
+   */
+  public addEntity(entity: Entity): void {
+    this.animationSystem.addEntity(entity);
+  }
+
+  /**
    * @pattern Observer
    * @description Set up event listeners for animation events
    */
   private setupEventListeners(): void {
     // Listen for animation events
-    this.eventBus.subscribe('animation:walk_started', (event: AnimationEvent) => {
+    this.eventBus.on('animation:walk_started', (event: AnimationEvent) => {
       this.handleAnimationEvent('walk_started', event);
     });
 
-    this.eventBus.subscribe('animation:walk_completed', (event: AnimationEvent) => {
+    this.eventBus.on('animation:walk_completed', (event: AnimationEvent) => {
       this.handleAnimationEvent('walk_completed', event);
     });
 
-    this.eventBus.subscribe('animation:frame_updated', (event: AnimationEvent) => {
+    this.eventBus.on('animation:frame_updated', (event: AnimationEvent) => {
       this.handleAnimationEvent('frame_updated', event);
     });
 
-    this.eventBus.subscribe('animation:state_changed', (event: AnimationEvent) => {
+    this.eventBus.on('animation:state_changed', (event: AnimationEvent) => {
       this.handleAnimationEvent('state_changed', event);
     });
   }

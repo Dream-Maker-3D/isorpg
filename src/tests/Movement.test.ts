@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Player } from '@domain/entity/Player';
 import { Map } from '@domain/entity/Map';
-import { CharacterClass } from '@domain/valueObject/CharacterClass';
+import { CharacterClass, CharacterClassFactory } from '@domain/valueObject/CharacterClass';
 import { PositionComponent } from '@domain/entity/components/PositionComponent';
 import { SpriteComponent } from '@domain/entity/components/SpriteComponent';
 import { AnimationComponent } from '@domain/entity/components/AnimationComponent';
@@ -32,7 +32,7 @@ describe('Movement System', () => {
     map.generateRandomMap();
 
     // Create player with components
-    const characterClass = CharacterClass.WARRIOR;
+    const characterClass = CharacterClassFactory.fromType('WARRIOR');
     const positionComponent = new PositionComponent();
     const spriteComponent = new SpriteComponent();
     const animationComponent = new AnimationComponent();

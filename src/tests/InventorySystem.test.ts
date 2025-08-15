@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Player } from '@domain/entity/Player';
-import { CharacterClass } from '@domain/valueObject/CharacterClass';
+import { CharacterClass, CharacterClassFactory } from '@domain/valueObject/CharacterClass';
 import { PositionComponent } from '@domain/entity/components/PositionComponent';
 import { SpriteComponent } from '@domain/entity/components/SpriteComponent';
 import { AnimationComponent } from '@domain/entity/components/AnimationComponent';
@@ -30,7 +30,7 @@ describe('Inventory System', () => {
 
   beforeEach(() => {
     // Create player with components
-    const characterClass = CharacterClass.WARRIOR;
+    const characterClass = CharacterClassFactory.fromType('WARRIOR');
     const positionComponent = new PositionComponent();
     const spriteComponent = new SpriteComponent();
     const animationComponent = new AnimationComponent();
@@ -294,7 +294,7 @@ describe('Inventory System', () => {
   describe('Inventory Events', () => {
     it('should emit item added events', () => {
       const callback = vi.fn();
-      eventBus.subscribe('inventory:event', callback);
+      eventBus.on('inventory:event', callback);
       
       inventoryService.addItemToPlayer(player, 'potion_health', 2);
       
@@ -310,7 +310,7 @@ describe('Inventory System', () => {
       inventoryService.addItemToPlayer(player, 'potion_health', 3);
       
       const callback = vi.fn();
-      eventBus.subscribe('inventory:event', callback);
+      eventBus.on('inventory:event', callback);
       
       inventoryService.removeItemFromPlayer(player, 'potion_health', 1);
       
@@ -324,7 +324,7 @@ describe('Inventory System', () => {
 
     it('should emit gold changed events', () => {
       const callback = vi.fn();
-      eventBus.subscribe('inventory:event', callback);
+      eventBus.on('inventory:event', callback);
       
       inventoryService.addGoldToPlayer(player, 50);
       
