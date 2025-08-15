@@ -497,31 +497,19 @@ export class GameOriginator {
  * @description Memento caretaker for managing save history and storage
  */
 export class GameCaretaker {
-  private _mementos: Map<string, GameMemento> = new Map();
+  public mementos: Map<string, GameMemento> = new Map();
   private originator: GameOriginator;
   private maxSaves: number = 10;
   private autoSaveInterval: number = 300000; // 5 minutes
   private lastAutoSave: number = 0;
 
-  // Getter to ensure mementos is always a Map
-  private get mementos(): Map<string, GameMemento> {
-    if (!(this._mementos instanceof Map)) {
-      this._mementos = new Map();
-    }
-    return this._mementos;
-  }
-
-  // Setter to ensure mementos is always a Map
-  private set mementos(value: Map<string, GameMemento>) {
-    if (value instanceof Map) {
-      this._mementos = value;
-    } else {
-      this._mementos = new Map();
-    }
-  }
-
   constructor(originator: GameOriginator) {
     this.originator = originator;
+    // Ensure mementos is always a Map
+    if (!(this.mementos instanceof Map)) {
+      this.mementos = new Map();
+    }
+    console.log('GameCaretaker constructor - mementos type:', typeof this.mementos, this.mementos instanceof Map);
   }
 
   /**
