@@ -496,8 +496,49 @@ export class GameOriginator {
  * @pattern Caretaker
  * @description Memento caretaker for managing save history and storage
  */
+// Simple object-based storage to avoid Map corruption issues
+class MementoStorage {
+  private storage: { [key: string]: GameMemento } = {};
+
+  set(key: string, value: GameMemento): void {
+    this.storage[key] = value;
+  }
+
+  get(key: string): GameMemento | undefined {
+    return this.storage[key];
+  }
+
+  has(key: string): boolean {
+    return key in this.storage;
+  }
+
+  delete(key: string): boolean {
+    if (this.has(key)) {
+      delete this.storage[key];
+      return true;
+    }
+    return false;
+  }
+
+  clear(): void {
+    this.storage = {};
+  }
+
+  size(): number {
+    return Object.keys(this.storage).length;
+  }
+
+  values(): GameMemento[] {
+    return Object.values(this.storage);
+  }
+
+  entries(): [string, GameMemento][] {
+    return Object.entries(this.storage);
+  }
+}
+
 export class GameCaretaker {
-  public mementos: Map<string, GameMemento> = new Map();
+  private mementos: MementoStorage = new MementoStorage();
   private originator: GameOriginator;
   private maxSaves: number = 10;
   private autoSaveInterval: number = 300000; // 5 minutes
@@ -505,11 +546,6 @@ export class GameCaretaker {
 
   constructor(originator: GameOriginator) {
     this.originator = originator;
-    // Ensure mementos is always a Map
-    if (!(this.mementos instanceof Map)) {
-      this.mementos = new Map();
-    }
-    console.log('GameCaretaker constructor - mementos type:', typeof this.mementos, this.mementos instanceof Map);
   }
 
   /**
@@ -590,7 +626,7 @@ export class GameCaretaker {
    * @description Get save count
    */
   public getSaveCount(): number {
-    return this.mementos.size;
+    return this.mementos.size();
   }
 
   /**
@@ -606,7 +642,7 @@ export class GameCaretaker {
    * @description Get latest save
    */
   public getLatestSave(): GameMemento | null {
-    if (this.mementos.size === 0) {
+    if (this.mementos.size() === 0) {
       return null;
     }
 
@@ -621,7 +657,7 @@ export class GameCaretaker {
    * @description Clean up old saves when exceeding limit
    */
   private cleanupOldSaves(): void {
-    if (this.mementos.size <= this.maxSaves) {
+    if (this.mementos.size() <= this.maxSaves) {
       return;
     }
 
@@ -681,7 +717,7 @@ export class GameCaretaker {
     } catch (error) {
       console.warn('Failed to import saves, resetting mementos:', error);
       // Reset mementos to prevent corruption
-      this.mementos = new Map();
+      this.mementos = new MementoStorage();
     }
   }
 }

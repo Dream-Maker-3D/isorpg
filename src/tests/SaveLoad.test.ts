@@ -163,18 +163,44 @@ describe('SaveLoadSystem', () => {
   });
 
   describe('Load Game', () => {
+    beforeEach(() => {
+      // Register entities
+      eventBus.emit('player:created', { player });
+      eventBus.emit('map:created', { map });
+    });
+
     it('should load game successfully', async () => {
-      const result = await saveLoadSystem.loadGame('test_save_id');
+      // First save a game to have something to load
+      const saveResult = await saveLoadSystem.saveGame('Test Save for Loading');
+      expect(saveResult).toBe(true);
+      
+      // Get the save ID from the available saves
+      const saves = saveLoadSystem.getAvailableSaves();
+      expect(saves.length).toBeGreaterThan(0);
+      const saveId = saves[0].id;
+      
+      // Now load the game
+      const result = await saveLoadSystem.loadGame(saveId);
       expect(result).toBe(true);
     });
 
     it('should emit load completion event', async () => {
+      // First save a game to have something to load
+      const saveResult = await saveLoadSystem.saveGame('Test Save for Loading');
+      expect(saveResult).toBe(true);
+      
+      // Get the save ID from the available saves
+      const saves = saveLoadSystem.getAvailableSaves();
+      expect(saves.length).toBeGreaterThan(0);
+      const saveId = saves[0].id;
+      
       let eventReceived = false;
       eventBus.on('saveLoad:game_state_loaded', () => {
         eventReceived = true;
       });
       
-      await saveLoadSystem.loadGame('test_save_id');
+      // Now load the game
+      await saveLoadSystem.loadGame(saveId);
       
       expect(eventReceived).toBe(true);
     });
@@ -294,10 +320,21 @@ describe('SaveLoadManager', () => {
   describe('Load Operations', () => {
     beforeEach(async () => {
       await saveLoadManager.initialize();
+      saveLoadManager.registerGameEntities(player, map);
     });
 
     it('should load game from save ID', async () => {
-      const result = await saveLoadManager.loadGame('test_save_id');
+      // First save a game to have something to load
+      const saveResult = await saveLoadManager.saveGame('Test Save for Loading');
+      expect(saveResult).toBe(true);
+      
+      // Get the save ID from the available saves
+      const saves = saveLoadManager.getAvailableSaves();
+      expect(saves.length).toBeGreaterThan(0);
+      const saveId = saves[0].id;
+      
+      // Now load the game
+      const result = await saveLoadManager.loadGame(saveId);
       expect(result).toBe(true);
     });
 

@@ -29,7 +29,9 @@ export class SaveLoadManager {
   private eventBus: EventBus;
   private isInitialized: boolean = false;
   private autoSaveEnabled: boolean = true;
-  private saveCallbacks: Map<string, (event: any) => void> = new Map();
+  private saveCallbacks: { [key: string]: (event: any) => void } = {};
+  private player: Player | null = null;
+  private map: Map | null = null;
 
   constructor() {
     this.saveLoadService = new SaveLoadService();
@@ -152,6 +154,10 @@ export class SaveLoadManager {
       throw new Error('SaveLoadManager not initialized');
     }
 
+    // Store entities locally for direct service calls
+    this.player = player;
+    this.map = map;
+
     // Emit events for the system to register
     this.eventBus.emit('player:created', { player });
     this.eventBus.emit('map:created', { map });
@@ -168,12 +174,20 @@ export class SaveLoadManager {
       throw new Error('SaveLoadManager not initialized');
     }
 
+    if (!this.player || !this.map) {
+      console.warn('SaveLoadManager: Cannot save - entities not registered');
+      return false;
+    }
+
     try {
-      const success = await this.saveLoadSystem.saveGame(saveName);
-      if (success) {
+      // Use SaveLoadService directly since we need to pass entities
+      // The SaveLoadSystem is for automatic operations, not manual saves
+      const memento = await this.saveLoadService.saveGame(saveName, this.player, this.map);
+      if (memento) {
         console.log(`SaveLoadManager: Game saved as "${saveName}"`);
+        return true;
       }
-      return success;
+      return false;
     } catch (error) {
       console.error('SaveLoadManager: Save failed:', error);
       return false;
@@ -190,11 +204,14 @@ export class SaveLoadManager {
     }
 
     try {
-      const success = await this.saveLoadSystem.loadGame(saveId);
-      if (success) {
+      // Use SaveLoadService directly since we need to pass entities
+      // The SaveLoadSystem is for automatic operations, not manual loads
+      const gameState = await this.saveLoadService.loadGame(saveId);
+      if (gameState) {
         console.log(`SaveLoadManager: Game loaded from save: ${saveId}`);
+        return true;
       }
-      return success;
+      return false;
     } catch (error) {
       console.error('SaveLoadManager: Load failed:', error);
       return false;
@@ -349,7 +366,7 @@ export class SaveLoadManager {
    * @description Register callback for save/load events
    */
   public onSaveLoadEvent(eventType: string, callback: (event: any) => void): void {
-    this.saveCallbacks.set(eventType, callback);
+    this.saveCallbacks[eventType] = callback;
   }
 
   /**
@@ -357,7 +374,7 @@ export class SaveLoadManager {
    * @description Remove callback for save/load events
    */
   public removeSaveLoadCallback(eventType: string): void {
-    this.saveCallbacks.delete(eventType);
+    delete this.saveCallbacks[eventType];
   }
 
   /**

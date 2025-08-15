@@ -51,9 +51,12 @@ export class SaveLoadService {
 
   constructor() {
     this.originator = new GameOriginator();
+    console.log('Creating GameCaretaker...');
     this.caretaker = new GameCaretaker(this.originator);
+    console.log('GameCaretaker created, mementos type:', typeof this.caretaker.mementos, this.caretaker.mementos instanceof Map);
     this.eventBus = EventBus.getInstance();
-    this.loadSavesFromStorage();
+    // Temporarily disable loading saves to debug Map corruption
+    // this.loadSavesFromStorage();
   }
 
   /**

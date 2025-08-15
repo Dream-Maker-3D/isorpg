@@ -74,6 +74,7 @@ export class MovementInputHandler extends InputHandler {
    * @description Initialize movement key mappings
    */
   private initializeMovementKeys(): void {
+    console.log('Initializing movement keys, movementKeys type:', typeof this.movementKeys, this.movementKeys instanceof Map, 'has set method:', typeof this.movementKeys.set);
     this.movementKeys.set('w', () => new MoveNorthCommand(this.player, this.map));
     this.movementKeys.set('a', () => new MoveWestCommand(this.player, this.map));
     this.movementKeys.set('s', () => new MoveSouthCommand(this.player, this.map));

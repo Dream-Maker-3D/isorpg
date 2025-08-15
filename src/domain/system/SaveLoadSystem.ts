@@ -90,7 +90,7 @@ export class SaveLoadSystem extends System {
    * @description Handle game pause event
    */
   private handleGamePause(event: any): void {
-    if (this.player && this.map) {
+    if (this.isEnabled && this.player && this.map) {
       this.autoSave();
     }
   }
